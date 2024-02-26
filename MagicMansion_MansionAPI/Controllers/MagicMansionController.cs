@@ -38,19 +38,26 @@ namespace MagicMansion_MansionAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<MansionDTO> CreateMansion(MansionDTO mansion)
+        public ActionResult<MansionDTO> CreateMansion(MansionDTO mansionDTO)
         {
-            if (mansion == null)
+            
+            if(MansionStore.mansionDTO.FirstOrDefault(c => c.Name.ToLower() == mansionDTO.Name.ToLower()) != null)
             {
-                return BadRequest(mansion);
+                ModelState.AddModelError("Custom Error", "This Mansion's already existed!");
+                return BadRequest(ModelState);
             }
-            if (mansion.Id != 0)
+            
+            if (mansionDTO == null)
+            {
+                return BadRequest(mansionDTO);
+            }
+            if (mansionDTO.Id != 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            mansion.Id = MansionStore.mansionDTO.OrderByDescending(c => c.Id).FirstOrDefault().Id + 1;
-            MansionStore.mansionDTO.Add(mansion);
-            return CreatedAtRoute("GetMansion", new { id = mansion.Id }, mansion);
+            mansionDTO.Id = MansionStore.mansionDTO.OrderByDescending(c => c.Id).FirstOrDefault().Id + 1;
+            MansionStore.mansionDTO.Add(mansionDTO);
+            return CreatedAtRoute("GetMansion", new { id = mansionDTO.Id }, mansionDTO);
         }
 
         [HttpDelete("{id}", Name = "DeleteMansion")]
